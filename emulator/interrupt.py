@@ -3,7 +3,7 @@ import time
 import threading
 from DHT22 import readSensor
 import pygame
-from LCD1602 import LCD1602
+from pnhLCD1602 import LCD1602
 
 _sensor_90 = 22
 _sensor_45 = 26
@@ -77,6 +77,7 @@ def clsf():
             _cnt_90 += 1
             _cls_90 = True
             _cls_45 = False
+            time.sleep(3)
 
         # similarly with 45cm-product
         elif _state and GPIO.input(_sensor_45) == 0:
@@ -84,6 +85,8 @@ def clsf():
             _cnt_45 += 1
             _cls_45 = True
             _cls_90 = False
+            time.sleep(3)
+        _cls_90 = _cls_45 = False
         time.sleep(0.1)
 
 
@@ -92,7 +95,6 @@ def relay():
     while True:
         GPIO.output(_relay_90, GPIO.HIGH if _cls_90 else GPIO.LOW)
         GPIO.output(_relay_45, GPIO.HIGH if _cls_45 else GPIO.LOW)
-        time.sleep(0.1)
 
 
 def lcd_config():
