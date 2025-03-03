@@ -17,6 +17,8 @@ _state = False
 _cnt_90 = 0
 _cnt_45 = 0
 _init = False
+_cls_90 = False
+_cls_45 = False
 
 
 GPIO.setmode(GPIO.BCM)
@@ -66,23 +68,30 @@ def led():
 
 
 def clsf():
-    global _state, _sensor_90, _sensor_45, _cnt_90, _cnt_45, _relay_90, _relay_45
+    global _state, _sensor_90, _sensor_45, _cnt_90, _cnt_45, _cls_90, _cls_45
     while True:
-        # if 90's product is encountered
+        # if 90cm-product is encountered
         # => raise up relay 90c, down relay 45c
         if _state and GPIO.input(_sensor_90) == 0:
             print("valid 90cm")
             _cnt_90 += 1
-            GPIO.output(_relay_90, GPIO.HIGH)
-            time.sleep(3)  # assume product takes 3s to exit
-            GPIO.output(_relay_90, GPIO.LOW)
+            _cls_90 = True
+            _cls_45 = False
 
+        # similarly with 45cm-product
         elif _state and GPIO.input(_sensor_45) == 0:
             print("valid 45cm")
             _cnt_45 += 1
-            GPIO.output(_relay_45, GPIO.HIGH)
-            time.sleep(5)  # assume product takes 5s to exit
-            GPIO.output(_relay_45, GPIO.LOW)
+            _cls_45 = True
+            _cls_90 = False
+        time.sleep(0.1)
+
+
+def relay():
+    global _relay_90, _relay_45, _cls_90, _cls_45
+    while True:
+        GPIO.output(_relay_90, GPIO.HIGH if _cls_90 else GPIO.LOW)
+        GPIO.output(_relay_45, GPIO.HIGH if _cls_45 else GPIO.LOW)
         time.sleep(0.1)
 
 
@@ -120,6 +129,7 @@ threading.Thread(target=start, daemon=True).start()
 threading.Thread(target=stop, daemon=True).start()
 threading.Thread(target=led, daemon=True).start()
 threading.Thread(target=clsf, daemon=True).start()
+threading.Thread(target=relay, daemon=True).start()
 threading.Thread(target=lcd_config).start()
 
 
