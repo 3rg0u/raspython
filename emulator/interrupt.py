@@ -14,6 +14,11 @@ _btn_start = 23
 _btn_stop = 24
 _led = 25
 _sensor_dht = 4
+_state = False
+_cnt_90 = 0
+_cnt_45 = 0
+_init = False
+
 
 GPIO.setmode(GPIO.BCM)
 
@@ -22,17 +27,9 @@ GPIO.setup(_sensor_45, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(_btn_start, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(_btn_stop, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-
 GPIO.setup(_relay_90, GPIO.OUT)
 GPIO.setup(_relay_45, GPIO.OUT)
 GPIO.setup(_led, GPIO.OUT)
-
-
-_state = False
-_clsf_90 = False
-_clsf_45 = False
-_cnt_90 = 0
-_cnt_45 = 0
 
 
 def read_sensor():
@@ -41,9 +38,10 @@ def read_sensor():
 
 
 def start():
-    global _state, _btn_start
+    global _state, _btn_start, _init
     while True:
         if GPIO.input(_btn_start) == 0:
+            _init = True
             _state = True
             print("started")
         time.sleep(0.1)
@@ -68,52 +66,59 @@ def led():
             time.sleep(2)
 
 
-def clsf_90():
-    global _state, _sensor_90, _clsf_90, _relay_90
+def clsf():
+    global _state, _sensor_90, _sensor_45, _cnt_90, _cnt_45, _relay_90, _relay_45
     while True:
         if _state and GPIO.input(_sensor_90) == 0:
-            _clsf_90 = not _clsf_90
-            print(f'class 90: {"on" if _clsf_90 else "off"}')
-            GPIO.output(_relay_90, GPIO.HIGH if _clsf_90 else GPIO.LOW)
-            print(f'relay 90: {"on" if _clsf_90 else "off"}')
+            print("valid 90cm")
+            _cnt_90 += 1
+            GPIO.output(_relay_90, GPIO.HIGH)
+            time.sleep(3)
+            GPIO.output(_relay_45, GPIO.LOW)
+        elif _state and GPIO.input(_sensor_45) == 0:
+            print("valid 45cm")
+            _cnt_45 += 1
+            GPIO.output(_relay_45, GPIO.HIGH)
+            time.sleep(5)
+            GPIO.output(_relay_90, GPIO.LOW)
+        elif _state:
+            print("not valid")
+            GPIO.output(_relay_90, GPIO.LOW)
+            GPIO.output(_relay_45, GPIO.LOW)
+            time.sleep(7)
         time.sleep(0.1)
 
 
-def clsf_45():
-    global _state, _sensor_45, _clsf_45
+def main():
+    global _lcd, _init, _cnt_90, _cnt_45
     while True:
-        if _state and GPIO.input(_sensor_45) == 0:
-            _clsf_45 = not _clsf_45
-            print(f'class 45: {"on" if _clsf_45 else "off"}')
-        time.sleep(0.1)
-
-
-def lcd_config(line1: str, line2: str):
-    global _lcd
-    _lcd.clear()
-    _lcd.write_string(line1)
-    _lcd.set_cursor(1, 0)
-    _lcd.write_string(line2)
-    pygame.time.delay(3000)
+        temp, humi = read_sensor()
+        _lcd.clear()
+        if not _init:
+            _lcd.write_string("DEM SAN PHAM D")
+            _lcd.set_cursor(1, 0)
+            _lcd.write_string(f"{temp:.2f}°C - {humi:.2f}%")
+        else:
+            _lcd.write_string(f"{temp:.2f}°C - {humi:.2f}%")
+            _lcd.setdefault(1, 0)
+            _lcd.write_string(f"90c={_cnt_90}-45c={_cnt_45}")
+        pygame.time.delay(200)
+        _lcd.backlight_off()
+        pygame.time.delay(50)
+        _lcd.backlight_on()
+        pygame.time.delay(50)
+        _lcd.home()
+        pygame.time.delay(50)
+        time.sleep(2)
+        _lcd.clear()
 
 
 threading.Thread(target=start, daemon=True).start()
 threading.Thread(target=stop, daemon=True).start()
 threading.Thread(target=led, daemon=True).start()
-threading.Thread(target=clsf_90, daemon=True).start()
-threading.Thread(target=clsf_45, daemon=True).start()
-
-
-def main():
-    global _state, _led
-    while True:
-        time.sleep(0.1)
-
-
+threading.Thread(target=clsf, daemon=True).start()
 if __name__ == "__main__":
     try:
-        temp, humi = read_sensor()
-        lcd_config(line1="Dem san pham d", line2=f" {temp:.1f}°C - {humi:.2f}%")
         main()
     except Exception as e:
         GPIO.cleanup()
