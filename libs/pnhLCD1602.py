@@ -1,8 +1,5 @@
-#Phạm Ngọc Hưng
-#Thư viện mô phỏng LCD 16x2 giao tiếp I2C
-#Cần cài đặt pygame để chạy được
-#pip install pygame
 import pygame
+
 
 class LCD1602:
     def __init__(self, width=250, height=60, address=0x27):
@@ -13,8 +10,8 @@ class LCD1602:
         self.address = address
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("LCD1602")
-        #self.font = pygame.font.SysFont("Arial", 24)
-        self.font = pygame.font.Font(pygame.font.match_font('courier'), 24)
+        # self.font = pygame.font.SysFont("Arial", 24)
+        self.font = pygame.font.Font(pygame.font.match_font("courier"), 24)
         self.lines = ["", ""]  # 2 dòng
         self.backlight = True
         self.cursor_visible = False
@@ -31,13 +28,15 @@ class LCD1602:
         if self.lines[0] == "":
             self.lines[0] = text[:16]  # Chỉ ghi tối đa 16 ký tự
         elif self.lines[1] == "":
-            self.lines[1] = text[:16]  # Ghi vào dòng thứ hai nếu dòng đầu đã có nội dung
+            self.lines[1] = text[
+                :16
+            ]  # Ghi vào dòng thứ hai nếu dòng đầu đã có nội dung
         self.display()
 
     def write_char(self, char):
         row, col = self.cursor_position
         if col < 16:
-            self.lines[row] = self.lines[row][:col] + char + self.lines[row][col + 1:]
+            self.lines[row] = self.lines[row][:col] + char + self.lines[row][col + 1 :]
             self.cursor_position = (row, col + 1)
             self.display()
 
@@ -69,20 +68,35 @@ class LCD1602:
         self.screen.fill((0, 0, 0))  # Màu nền đen
         for i in range(2):
             text = self.lines[i]
-            rendered_text = self.font.render(text, True, (0, 255, 0) if self.backlight else (50, 50, 50))
+            rendered_text = self.font.render(
+                text, True, (0, 255, 0) if self.backlight else (50, 50, 50)
+            )
             # Đặt vị trí hiển thị cho dòng đầu tiên và dòng thứ hai
             if i == 0:
-                self.screen.blit(rendered_text, (10, 2))  # Dòng đầu tiên sát với thanh tiêu đề
+                self.screen.blit(
+                    rendered_text, (10, 2)
+                )  # Dòng đầu tiên sát với thanh tiêu đề
             else:
-                self.screen.blit(rendered_text, (10, 30))  # Dòng thứ hai sát với dòng đầu
+                self.screen.blit(
+                    rendered_text, (10, 30)
+                )  # Dòng thứ hai sát với dòng đầu
 
         if self.cursor_visible:
-            cursor_x = (10 + self.cursor_position[1] * 15) if self.cursor_position[0] == 1 else (0 + self.cursor_position[1] * 15)
-            cursor_y = (30 if self.cursor_position[0] == 1 else 0)
-            pygame.draw.line(self.screen, (255, 0, 0), (cursor_x, cursor_y), (cursor_x, cursor_y + 30), 2)
+            cursor_x = (
+                (10 + self.cursor_position[1] * 15)
+                if self.cursor_position[0] == 1
+                else (0 + self.cursor_position[1] * 15)
+            )
+            cursor_y = 30 if self.cursor_position[0] == 1 else 0
+            pygame.draw.line(
+                self.screen,
+                (255, 0, 0),
+                (cursor_x, cursor_y),
+                (cursor_x, cursor_y + 30),
+                2,
+            )
 
         pygame.display.flip()
- 
 
     def close(self):
         pygame.quit()

@@ -1,0 +1,1 @@
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=900&size=50&duration=3000&pause=500&color=F7A0A0&center=true&vCenter=true&width=720&height=100&lines=raspberry+pi)](https://www.github.com/3rg0u/raspython)

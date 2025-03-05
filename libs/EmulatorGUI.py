@@ -1,7 +1,7 @@
 from tkinter import *
 import tkinter as tk
-from PIN import PIN
-from TypeChecker import typeassert
+from libs.PIN import PIN
+from libs.TypeChecker import typeassert
 import threading
 import time
 

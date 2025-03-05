@@ -1,6 +1,7 @@
 from inspect import signature
 from functools import wraps
 
+
 def typeassert(*ty_args, **ty_kwargs):
     def decorate(func):
         # If in optimized mode, disable type checking
@@ -18,9 +19,11 @@ def typeassert(*ty_args, **ty_kwargs):
             for name, value in bound_values.arguments.items():
                 if name in bound_types:
                     if not isinstance(value, bound_types[name]):
-                      raise TypeError(
-                        'Argument {} must be {}'.format(name, bound_types[name])
+                        raise TypeError(
+                            "Argument {} must be {}".format(name, bound_types[name])
                         )
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorate
