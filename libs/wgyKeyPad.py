@@ -38,10 +38,21 @@ class App(threading.Thread):
 
 
 class KeyPad:
-    def __init__(self, row_pins, col_pins, key_map, emu=True):
+    __KEY_MAPS = {
+        "4x4": [
+            ["1", "2", "3", "A"],
+            ["4", "5", "6", "B"],
+            ["7", "8", "9", "C"],
+            ["*", "0", "#", "D"],
+        ],
+        "3x3": [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]],
+        "3x4": [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], ["*", "0", "#"]],
+    }
+
+    def __init__(self, row_pins, col_pins, key_map="4x4", emu=True):
         self.row_pins = row_pins
         self.col_pins = col_pins
-        self.key_map = key_map
+        self.key_map = KeyPad.__KEY_MAPS[key_map]
         self.__setup()
         self.emu = emu
         if self.emu:
