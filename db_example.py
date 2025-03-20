@@ -5,6 +5,7 @@ DB_CONFIG = {
     "user": "username",
     "password": "pw",
     "database": "db_name",
+    "port": 3306,
 }
 
 
