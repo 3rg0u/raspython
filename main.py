@@ -1,6 +1,6 @@
 import libs.wgyKeyPad, libs.pnhLCD1602
 import time
-from db import fetch_pass
+# from db import fetch_pass
 import hashlib
 import pygame
 import threading
@@ -9,7 +9,13 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 
-__PW = fetch_pass()
+
+def sha1(bstr):
+    return hashlib.sha1(bstr).digest().hex()
+
+# __PW = fetch_pass()
+__PW = sha1(b'5638)
+
 __ROW_PINS = [14, 15, 18, 23]
 __COL_PINS = [24, 25, 8, 7]
 __RELAY_PIN = 17
@@ -28,8 +34,7 @@ _CURRENT = b""
 _MSG = f"Enter: {_CURRENT.decode()}"
 
 
-def sha1(bstr):
-    return hashlib.sha1(bstr).digest().hex()
+
 
 
 def lcd_config():
